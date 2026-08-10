@@ -1,0 +1,33 @@
+name: Automated Macro Data Pipeline
+
+on:
+  schedule:
+    - cron: '0 0 * * 0' # Berjalan setiap hari Minggu
+  workflow_dispatch: # Memungkinkan eksekusi manual via UI GitHub
+
+jobs:
+  run-pipeline:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pandas psycopg2-binary yfinance requests prophet statsmodels
+
+      - name: Execute Pipeline Script
+        env:
+          DB_HOST: ${{ secrets.DB_HOST }}
+          DB_NAME: ${{ secrets.DB_NAME }}
+          DB_USER: ${{ secrets.DB_USER }}
+          DB_PASS: ${{ secrets.DB_PASS }}
+          DB_PORT: ${{ secrets.DB_PORT }}
+        run: |
+          python project_1_macro_forecasting/scripts/fetch_data.py
