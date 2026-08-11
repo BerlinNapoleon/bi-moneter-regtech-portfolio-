@@ -93,4 +93,42 @@ fig.update_layout(
     hovermode='x unified'
 )
 
-st.plotly_chart(fig, use_container_width=True)
+@st.cache_data(ttl=3600)
+def get_historical_stock(ticker_symbol, name, period='1y'):
+    try:
+        ticker = yf.Ticker(ticker_symbol)
+        df = ticker.history(period=period)
+        df.reset_index(inplace=True)
+        return df[['Date', 'Close']].rename(columns={'Close': name})
+    except Exception as e:
+        return pd.DataFrame()
+
+st.subheader('📈 Analisis Real-Time Pasar Saham & Komoditas')
+
+col_chart1, col_chart2 = st.columns(2)
+
+with col_chart1:
+    st.markdown("**Pergerakan USD/IDR (1 Tahun Terakhir)**")
+    usd_df = get_historical_stock('USDIDR=X', 'USD/IDR')
+    if not usd_df.empty:
+        fig_usd = go.Figure()
+        fig_usd.add_trace(go.Scatter(x=usd_df['Date'], y=usd_df['USD/IDR'], mode='lines', name='USD/IDR', line=dict(color='green')))
+        fig_usd.update_layout(template='plotly_white', margin=dict(l=0, r=0, t=30, b=0), hovermode='x unified')
+        st.plotly_chart(fig_usd, use_container_width=True)
+
+with col_chart2:
+    st.markdown("**Pergerakan Harga Minyak WTI (1 Tahun Terakhir)**")
+    wti_df = get_historical_stock('CL=F', 'WTI Crude Oil')
+    if not wti_df.empty:
+        fig_wti = go.Figure()
+        fig_wti.add_trace(go.Scatter(x=wti_df['Date'], y=wti_df['WTI Crude Oil'], mode='lines', name='WTI Price', line=dict(color='orange')))
+        fig_wti.update_layout(template='plotly_white', margin=dict(l=0, r=0, t=30, b=0), hovermode='x unified')
+        st.plotly_chart(fig_wti, use_container_width=True)
+
+st.markdown("### 🔍 Analisis Singkat Data Saat Ini")
+st.info(f"""
+Berdasarkan data real-time:
+- **Nilai Tukar Rupiah:** Berada di kisaran **Rp {usd_idr_price:,.0f}**. Fluktuasi ini dapat mempengaruhi harga barang impor.
+- **Harga Minyak Dunia (WTI):** Berada di level **${wti_price:.2f}**. Harga minyak memiliki korelasi yang kuat terhadap subsidi energi pemerintah dan potensi inflasi *administered prices* (harga yang diatur pemerintah).
+- **Inflasi Indonesia:** Berada di angka **{inflation_val:.2f}%** (Data Bank Dunia terbaru). Hal ini masih relatif terkendali sesuai rentang target Bank Indonesia.
+""")
