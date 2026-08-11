@@ -63,7 +63,7 @@ with col_table:
 
     # Custom styling
     styled_df = df_banks.style\
-        .applymap(color_status, subset=['Status Pelaporan', 'Status Kesehatan'])\
+        .map(color_status, subset=['Status Pelaporan', 'Status Kesehatan'])\
         .background_gradient(subset=['NPL (%)'], cmap='Reds', vmin=0, vmax=5.5)\
         .background_gradient(subset=['CAR (%)'], cmap='Greens_r', vmin=10, vmax=25)
     
