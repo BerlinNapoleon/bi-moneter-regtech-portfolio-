@@ -18,7 +18,7 @@ def get_realtime_usd_idr():
         delta = latest_price - prev_price
         return latest_price, delta
     except Exception as e:
-        return 16000, 0 # Fallback default
+        return 17750, 0 # Fallback default
 
 # Fetch real-time data
 usd_idr_price, usd_idr_delta = get_realtime_usd_idr()
